@@ -1,1 +1,1 @@
-look at ocmodal for test stuff
+A lot of the calendar rendering code is adapted from the venerable [Pikaday](https://github.com/dbushell/Pikaday). It's well worth checking out.
