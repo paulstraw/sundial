@@ -23,9 +23,10 @@
         minDate: null,
         maxDate: null,
         enableDate: null,
-        firstDay: 1,
+        weekStart: 0,
         timePickerDescription: 'Format: 24hr',
         inputFormat: 'YYYY, dddd MMM Do, h:mmA Z',
+        dayOfWeekFormat: 'ddd',
         sidebarYearFormat: 'YYYY',
         sidebarDateFormat: 'ddd, MMM D',
         sidebarTimeFormat: 'h:mmA Z'
@@ -40,7 +41,7 @@
       this._buildPopover();
       this._wrapEl();
       this._bindEvents();
-      this._renderCalendar();
+      this._buildCalendar();
     }
 
     Sundial.prototype.show = function() {
@@ -52,18 +53,18 @@
     };
 
     Sundial.prototype.setCurrentMonth = function(year, month) {
-      this.currentMonth = moment(year + "-" + month, 'YYYY-M');
-      return this._renderCalendar();
+      this.currentMonth = moment(year + "-" + month, 'YYYY-M').startOf('month');
+      return this._buildCalendar();
     };
 
     Sundial.prototype.decrementCurrentMonth = function() {
-      this.currentMonth = this.currentMonth.subtract(1, 'month');
-      return this._renderCalendar();
+      this.currentMonth.subtract(1, 'month').startOf('month');
+      return this._buildCalendar();
     };
 
     Sundial.prototype.incrementCurrentMonth = function() {
-      this.currentMonth = this.currentMonth.add(1, 'month');
-      return this._renderCalendar();
+      this.currentMonth.add(1, 'month').startOf('month');
+      return this._buildCalendar();
     };
 
     Sundial.prototype._makeEl = function(tagName, className, innerText) {
@@ -121,16 +122,16 @@
     };
 
     Sundial.prototype._buildTimePicker = function() {
-      var h, hourEl, i, j, m, minuteEl;
+      var h, hourEl, j, k, m, minuteEl;
       this.els.timePicker = this._makeEl('div', this.settings.classPrefix + "-time-picker");
       this.els.timePickerHour = this._makeEl('select', this.settings.classPrefix + "-time-picker-hour");
       this.els.timePickerMinute = this._makeEl('select', this.settings.classPrefix + "-time-picker-minute");
       this.els.timePickerDescription = this._makeEl('p', this.settings.classPrefix + "-time-picker-description", this.settings.timePickerDescription);
-      for (h = i = 0; i <= 23; h = ++i) {
+      for (h = j = 0; j <= 23; h = ++j) {
         hourEl = this._makeEl('option', null, ('0' + h).slice(-2));
         this.els.timePickerHour.appendChild(hourEl);
       }
-      for (m = j = 0; j <= 59; m = ++j) {
+      for (m = k = 0; k <= 59; m = ++k) {
         minuteEl = this._makeEl('option', null, ('0' + m).slice(-2));
         this.els.timePickerMinute.appendChild(minuteEl);
       }
@@ -159,11 +160,81 @@
       return this.els.datePickerIncrementMonth.addEventListener('click', this.incrementCurrentMonth, true);
     };
 
-    Sundial.prototype._renderCalendar = function() {
-      var calendarHtml, daysInMonth;
-      daysInMonth = this.currentMonth.daysInMonth();
-      calendarHtml = '';
+    Sundial.prototype._buildCalendarHeader = function() {
+      var days, i, j;
+      days = ['<tr>'];
+      for (i = j = 0; j < 7; i = ++j) {
+        days.push("<th>" + (moment().set('day', i + this.settings.weekStart).format(this.settings.dayOfWeekFormat)) + "</th>");
+      }
+      days.push('</tr>');
+      return days;
+    };
+
+    Sundial.prototype._buildCalendarDay = function(dayInfo) {
+      var dayClasses;
+      if (dayInfo.empty) {
+        return "<td class=\"" + this.settings.classPrefix + "-day-empty\"></td>";
+      }
+      dayClasses = [];
+      if (dayInfo.today) {
+        dayClasses.push(this.settings.classPrefix + "-day-today");
+      }
+      return "<td class=\"" + this.settings.classPrefix + "-day " + (dayClasses.join(' ')) + "\">\n  <button data-date=\"" + dayInfo.dateString + "\" class=\"" + this.settings.classPrefix + "-day-button\">\n    " + dayInfo.dayOfMonth + "\n  </button>\n</td>";
+    };
+
+    Sundial.prototype._buildCalendar = function() {
+      var calendarMatrix, cellCount, day, dayInfo, daysAfterMonthEnd, daysBeforeMonthStart, daysInMonth, i, j, ref, rowLength;
       this.els.datePickerHeaderText.innerText = (this.currentMonth.format('MMMM')) + " " + (this.currentMonth.format('YYYY'));
+      calendarMatrix = [];
+      calendarMatrix.push(this._buildCalendarHeader());
+      daysInMonth = this.currentMonth.daysInMonth();
+      daysBeforeMonthStart = this.currentMonth.day();
+      if (this.settings.weekStart > 0) {
+        daysBeforeMonthStart -= this.settings.weekStart;
+        if (daysBeforeMonthStart < 0) {
+          daysBeforeMonthStart += 7;
+        }
+      }
+      cellCount = daysInMonth + daysBeforeMonthStart;
+      daysAfterMonthEnd = cellCount;
+      while (daysAfterMonthEnd > 7) {
+        daysAfterMonthEnd -= 7;
+      }
+      cellCount += 7 - daysAfterMonthEnd;
+      console.log('dbda', daysBeforeMonthStart, daysAfterMonthEnd);
+      rowLength = 0;
+      for (i = j = 0, ref = cellCount; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
+        if (rowLength === 0) {
+          calendarMatrix.push(['<tr>']);
+        }
+        day = this.currentMonth.clone().date(1 + (i - daysBeforeMonthStart));
+        dayInfo = {
+          empty: i < daysBeforeMonthStart || i >= (daysInMonth + daysBeforeMonthStart),
+          today: day.isSame(moment(), 'day'),
+          dateString: day.format('YYYY-MM-DD'),
+          dayOfMonth: day.date()
+        };
+        calendarMatrix[calendarMatrix.length - 1].push(this._buildCalendarDay(dayInfo));
+        if (++rowLength === 7) {
+          calendarMatrix[calendarMatrix.length - 1].push('</tr>');
+          rowLength = 0;
+        }
+      }
+      return this._renderCalendar(calendarMatrix);
+    };
+
+    Sundial.prototype._renderCalendar = function(calendarMatrix) {
+      var calendarHtml, col, j, k, len, len1, row;
+      console.log(calendarMatrix);
+      calendarHtml = '<table><tbody>';
+      for (j = 0, len = calendarMatrix.length; j < len; j++) {
+        row = calendarMatrix[j];
+        for (k = 0, len1 = row.length; k < len1; k++) {
+          col = row[k];
+          calendarHtml += col;
+        }
+      }
+      calendarHtml += '</tbody></table>';
       return this.els.calendarContainer.innerHTML = calendarHtml;
     };
 

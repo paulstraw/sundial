@@ -10,9 +10,10 @@ class Sundial
       minDate: null # A `moment` specifying the earliest date that can be selected
       maxDate: null # A `moment` specifying the latest date that can be selected
       enableDate: null # A function that receives a `moment` and returns a boolean. Returning `true` enables the date for selection, `false` disables it
-      firstDay: 1 # First day of the week (0 is Sunday)
+      weekStart: 0 # First day of the week (0 is Sunday)
       timePickerDescription: 'Format: 24hr' # Descriptive text below time picker
       inputFormat: 'YYYY, dddd MMM Do, h:mmA Z' # Display format for input
+      dayOfWeekFormat: 'ddd' # Display format for calendar header
       sidebarYearFormat: 'YYYY' # Display format for sidebar year
       sidebarDateFormat: 'ddd, MMM D' # Display format for sidebar date
       sidebarTimeFormat: 'h:mmA Z' # Display format for sidebar time
@@ -33,7 +34,7 @@ class Sundial
     @_wrapEl()
     @_bindEvents()
 
-    @_renderCalendar()
+    @_buildCalendar()
 
   show: =>
     console.log 'should show'
@@ -42,16 +43,16 @@ class Sundial
     console.log 'should hide'
 
   setCurrentMonth: (year, month) =>
-    @currentMonth = moment("#{year}-#{month}", 'YYYY-M')
-    @_renderCalendar()
+    @currentMonth = moment("#{year}-#{month}", 'YYYY-M').startOf('month')
+    @_buildCalendar()
 
   decrementCurrentMonth: =>
-    @currentMonth = @currentMonth.subtract(1, 'month')
-    @_renderCalendar()
+    @currentMonth.subtract(1, 'month').startOf('month')
+    @_buildCalendar()
 
   incrementCurrentMonth: =>
-    @currentMonth = @currentMonth.add(1, 'month')
-    @_renderCalendar()
+    @currentMonth.add(1, 'month').startOf('month')
+    @_buildCalendar()
 
   _makeEl: (tagName, className, innerText) ->
     el = document.createElement tagName
@@ -156,13 +157,97 @@ class Sundial
     @els.datePickerDecrementMonth.addEventListener 'click', @decrementCurrentMonth, true
     @els.datePickerIncrementMonth.addEventListener 'click', @incrementCurrentMonth, true
 
-  _renderCalendar: ->
-    daysInMonth = @currentMonth.daysInMonth()
-    calendarHtml = ''
+  _buildCalendarHeader: ->
+    days = ['<tr>']
 
+    for i in [0...7]
+      days.push "<th>#{moment().set('day', i + @settings.weekStart).format(@settings.dayOfWeekFormat)}</th>"
+
+    days.push '</tr>'
+
+    return days
+
+  _buildCalendarDay: (dayInfo) ->
+    if dayInfo.empty
+      return """<td class="#{@settings.classPrefix}-day-empty"></td>"""
+
+    dayClasses = []
+
+    # dayClasses.push "#{@settings.classPrefix}-day-disabled" if dayInfo.disabled
+    dayClasses.push "#{@settings.classPrefix}-day-today" if dayInfo.today
+    # dayClasses.push "#{@settings.classPrefix}-day-selected" if dayInfo.selected
+    # dayClasses.push "#{@settings.classPrefix}-day-in-range" if dayInfo.inRange
+    # dayClasses.push "#{@settings.classPrefix}-day-is-start-range" if dayInfo.isStartRange
+    # dayClasses.push "#{@settings.classPrefix}-day-is-end-range" if dayInfo.isEndRange
+
+    return """
+      <td class="#{@settings.classPrefix}-day #{dayClasses.join(' ')}">
+        <button data-date="#{dayInfo.dateString}" class="#{@settings.classPrefix}-day-button">
+          #{dayInfo.dayOfMonth}
+        </button>
+      </td>
+    """
+
+  _buildCalendar: ->
+    # update the header to display the correct month and year
     @els.datePickerHeaderText.innerText = "#{@currentMonth.format('MMMM')} #{@currentMonth.format('YYYY')}"
-    @els.calendarContainer.innerHTML = calendarHtml
 
+    # actually render out the calendar-y bits
+    calendarMatrix = []
+    calendarMatrix.push @_buildCalendarHeader()
+    daysInMonth = @currentMonth.daysInMonth()
+    daysBeforeMonthStart = @currentMonth.day()
+
+    if @settings.weekStart > 0
+      daysBeforeMonthStart -= @settings.weekStart
+      daysBeforeMonthStart += 7 if daysBeforeMonthStart < 0
+
+    cellCount = daysInMonth + daysBeforeMonthStart
+    daysAfterMonthEnd = cellCount
+
+    daysAfterMonthEnd -= 7 while daysAfterMonthEnd > 7
+
+    cellCount += 7 - daysAfterMonthEnd
+    console.log 'dbda', daysBeforeMonthStart, daysAfterMonthEnd
+
+    rowLength = 0
+
+    for i in [0...cellCount]
+      calendarMatrix.push(['<tr>']) if rowLength == 0
+      day = @currentMonth.clone().date(1 + (i - daysBeforeMonthStart))
+
+      dayInfo =
+        empty: i < daysBeforeMonthStart || i >= (daysInMonth + daysBeforeMonthStart)
+        # disabled:
+        today: day.isSame(moment(), 'day')
+        dateString: day.format('YYYY-MM-DD')
+        dayOfMonth: day.date()
+        # selected:
+        # inRange:
+        # isStartRange:
+        # isEndRange:
+
+      # add `td` to the current matrix row
+      calendarMatrix[calendarMatrix.length - 1].push @_buildCalendarDay(dayInfo)
+
+      if ++rowLength == 7
+        # advance to next row
+        calendarMatrix[calendarMatrix.length - 1].push('</tr>')
+        rowLength = 0
+
+    @_renderCalendar(calendarMatrix)
+
+  _renderCalendar: (calendarMatrix) ->
+    console.log calendarMatrix
+    calendarHtml = '<table><tbody>'
+
+    for row in calendarMatrix
+      for col in row
+        calendarHtml += col
+
+    calendarHtml += '</tbody></table>'
+
+    @els.calendarContainer.innerHTML = calendarHtml
 
 
 window.Sundial = Sundial
