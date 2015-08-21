@@ -1,3 +1,14 @@
+makeEl = (tagName, className, innerText) ->
+  el = document.createElement tagName
+  el.className = className if className?
+  el.innerText = innerText if innerText?
+
+  return el
+
+hasClass = (el, className) ->
+  className in el.className.split(' ')
+
+
 class Sundial
   constructor: (el, options = {}) ->
     @settings =
@@ -12,11 +23,13 @@ class Sundial
       enableDate: null # A function that receives a `moment` and returns a boolean. Returning `true` enables the date for selection, `false` disables it
       weekStart: 0 # First day of the week (0 is Sunday)
       timePickerDescription: 'Format: 24hr' # Descriptive text below time picker
-      inputFormat: 'YYYY, dddd MMM Do, h:mmA Z' # Display format for input
+      inputFormat: null # Format for input (what's actually sent to the server, defaults to ISO 8601)
+      maskFormat: 'YYYY, dddd MMM Do, h:mmA Z' # Display format for input mask
       dayOfWeekFormat: 'ddd' # Display format for calendar header
       sidebarYearFormat: 'YYYY' # Display format for sidebar year
       sidebarDateFormat: 'ddd, MMM D' # Display format for sidebar date
       sidebarTimeFormat: 'h:mmA Z' # Display format for sidebar time
+      dayButtonDateFormat: 'YYYY-MM-DD' # Internal-ish. Sets the data attribute format on calendar day buttons
 
     # override defaults with passed options
     @settings[key] = val for key, val of options
@@ -27,7 +40,9 @@ class Sundial
 
     # create a container for element references
     @els = {}
+
     @els.input = el
+    @_setUpInput()
 
     # build out all the basic elements
     @_buildPopover()
@@ -35,6 +50,10 @@ class Sundial
     @_bindEvents()
 
     @_buildCalendar()
+
+    # set currently selected dateTime
+    # TODO override this by actual DOM value, as appropriate
+    @setSelectedDate moment(), true
 
   show: =>
     console.log 'should show'
@@ -54,22 +73,36 @@ class Sundial
     @currentMonth.add(1, 'month').startOf('month')
     @_buildCalendar()
 
-  _makeEl: (tagName, className, innerText) ->
-    el = document.createElement tagName
-    el.className = className if className?
-    el.innerText = innerText if innerText?
+  setSelectedDate: (date, setTime = false) =>
+    currentlySelectedHour = if @selectedDate then @selectedDate.hour() else 0
+    currentlySelectedMinute = if @selectedDate then @selectedDate.minute() else 0
 
-    return el
+    @selectedDate = date
+
+    # by default, don't update the time
+    unless setTime
+      @setSelectedHour(currentlySelectedHour)
+      @setSelectedMinute(currentlySelectedMinute)
+
+    @_renderSelectedDateTime()
+
+  setSelectedHour: (hour) =>
+
+  setSelectedMinute: (minute) =>
+
+
+  _setUpInput: ->
+    @els.input.setAttribute 'readonly', 'true'
 
   _buildPopover: ->
     # build the popover container
-    @els.popover = @_makeEl 'div', "#{@settings.classPrefix}-popover"
+    @els.popover = makeEl 'div', "#{@settings.classPrefix}-popover"
 
     # build the sidebar if necessary
     @_buildSidebar() if @settings.enableSidebar == true
 
     # create the div that holds the date (and optionally time) pickers themselves
-    @els.pickerContainer = @_makeEl 'div', "#{@settings.classPrefix}-picker-container"
+    @els.pickerContainer = makeEl 'div', "#{@settings.classPrefix}-picker-container"
     @els.popover.appendChild @els.pickerContainer
 
     # build the date picker
@@ -82,32 +115,32 @@ class Sundial
 
   _buildSidebar: ->
     # create and append the elements for sidebar stuff
-    @els.sidebar = @_makeEl 'div', "#{@settings.classPrefix}-sidebar"
+    @els.sidebar = makeEl 'div', "#{@settings.classPrefix}-sidebar"
 
-    @els.sidebarYear = @_makeEl 'p', "#{@settings.classPrefix}-sidebar-year"
+    @els.sidebarYear = makeEl 'p', "#{@settings.classPrefix}-sidebar-year"
     @els.sidebar.appendChild @els.sidebarYear
 
-    @els.sidebarDate = @_makeEl 'p', "#{@settings.classPrefix}-sidebar-date"
+    @els.sidebarDate = makeEl 'p', "#{@settings.classPrefix}-sidebar-date"
     @els.sidebar.appendChild @els.sidebarDate
 
     if @settings.enableTimePicker == true
-      @els.sidebarTime = @_makeEl 'p', "#{@settings.classPrefix}-sidebar-time"
+      @els.sidebarTime = makeEl 'p', "#{@settings.classPrefix}-sidebar-time"
       @els.sidebar.appendChild @els.sidebarTime
 
     @els.popover.appendChild @els.sidebar
 
   _buildDatePicker: ->
-    @els.datePicker = @_makeEl 'div', "#{@settings.classPrefix}-date-picker"
-    @els.datePickerHeader = @_makeEl 'header', "#{@settings.classPrefix}-date-picker-header"
-    @els.datePickerDecrementMonth = @_makeEl 'button', "#{@settings.classPrefix}-date-picker-decrement-month", 'Previous Month'
-    @els.datePickerHeaderText = @_makeEl 'p', "#{@settings.classPrefix}-date-picker-header-text"
-    @els.datePickerIncrementMonth = @_makeEl 'button', "#{@settings.classPrefix}-date-picker-increment-month", 'Next Month'
+    @els.datePicker = makeEl 'div', "#{@settings.classPrefix}-date-picker"
+    @els.datePickerHeader = makeEl 'header', "#{@settings.classPrefix}-date-picker-header"
+    @els.datePickerDecrementMonth = makeEl 'button', "#{@settings.classPrefix}-date-picker-decrement-month", 'Previous Month'
+    @els.datePickerHeaderText = makeEl 'p', "#{@settings.classPrefix}-date-picker-header-text"
+    @els.datePickerIncrementMonth = makeEl 'button', "#{@settings.classPrefix}-date-picker-increment-month", 'Next Month'
 
     @els.datePickerHeader.appendChild @els.datePickerDecrementMonth
     @els.datePickerHeader.appendChild @els.datePickerHeaderText
     @els.datePickerHeader.appendChild @els.datePickerIncrementMonth
 
-    @els.calendarContainer = @_makeEl 'div', "#{@settings.classPrefix}-calendar-container"
+    @els.calendarContainer = makeEl 'div', "#{@settings.classPrefix}-calendar-container"
 
     @els.datePicker.appendChild @els.datePickerHeader
     @els.datePicker.appendChild @els.calendarContainer
@@ -116,19 +149,19 @@ class Sundial
 
   _buildTimePicker: ->
     # create elements for time picker
-    @els.timePicker = @_makeEl 'div', "#{@settings.classPrefix}-time-picker"
-    @els.timePickerHour = @_makeEl 'select', "#{@settings.classPrefix}-time-picker-hour"
-    @els.timePickerMinute = @_makeEl 'select', "#{@settings.classPrefix}-time-picker-minute"
-    @els.timePickerDescription = @_makeEl 'p', "#{@settings.classPrefix}-time-picker-description", @settings.timePickerDescription
+    @els.timePicker = makeEl 'div', "#{@settings.classPrefix}-time-picker"
+    @els.timePickerHour = makeEl 'select', "#{@settings.classPrefix}-time-picker-hour"
+    @els.timePickerMinute = makeEl 'select', "#{@settings.classPrefix}-time-picker-minute"
+    @els.timePickerDescription = makeEl 'p', "#{@settings.classPrefix}-time-picker-description", @settings.timePickerDescription
 
     # generate hour options
     for h in [0..23]
-      hourEl = @_makeEl 'option', null, ('0' + h).slice(-2) # poor man's `rjust`
+      hourEl = makeEl 'option', null, ('0' + h).slice(-2) # poor man's `rjust`
       @els.timePickerHour.appendChild hourEl
 
     # generate minute options
     for m in [0..59]
-      minuteEl = @_makeEl 'option', null, ('0' + m).slice(-2) # poor man's `rjust`
+      minuteEl = makeEl 'option', null, ('0' + m).slice(-2) # poor man's `rjust`
       @els.timePickerMinute.appendChild minuteEl
 
     # append elements in the right spots
@@ -139,12 +172,15 @@ class Sundial
     @els.pickerContainer.appendChild @els.timePicker
 
   _wrapEl: ->
-    @els.wrapper = @_makeEl @settings.wrapperTagName, "#{@settings.classPrefix}-wrapper"
+    @els.wrapper = makeEl @settings.wrapperTagName, "#{@settings.classPrefix}-wrapper"
 
     parent = @els.input.parentNode
     nextSibling = @els.input.nextSibling
 
-    @els.wrapper.appendChild(@els.input)
+    @els.wrapper.appendChild @els.input
+
+    @els.inputMask = makeEl 'div', "#{@settings.classPrefix}-input-mask"
+    @els.wrapper.appendChild @els.inputMask
 
     if nextSibling
       parent.insertBefore @els.wrapper, nextSibling
@@ -156,6 +192,8 @@ class Sundial
     # @els.input.addEventListener 'blur', @hide, true
     @els.datePickerDecrementMonth.addEventListener 'click', @decrementCurrentMonth, true
     @els.datePickerIncrementMonth.addEventListener 'click', @incrementCurrentMonth, true
+
+    @els.calendarContainer.addEventListener 'click', @_handleCalendarDayClick, true
 
   _buildCalendarHeader: ->
     days = ['<tr>']
@@ -220,7 +258,7 @@ class Sundial
         empty: i < daysBeforeMonthStart || i >= (daysInMonth + daysBeforeMonthStart)
         # disabled:
         today: day.isSame(moment(), 'day')
-        dateString: day.format('YYYY-MM-DD')
+        dateString: day.format(@settings.dayButtonDateFormat)
         dayOfMonth: day.date()
         # selected:
         # inRange:
@@ -249,5 +287,14 @@ class Sundial
 
     @els.calendarContainer.innerHTML = calendarHtml
 
+  _renderSelectedDateTime: ->
+    @els.input.value = @selectedDate.format(@settings.inputFormat)
+    @els.inputMask.innerText = @selectedDate.format(@settings.maskFormat)
+
+  _handleCalendarDayClick: (e) =>
+    clicked = e.target
+    return unless hasClass(clicked, 'sundial-day-button')
+
+    @setSelectedDate moment(clicked.dataset.date, @settings.dayButtonDateFormat)
 
 window.Sundial = Sundial
