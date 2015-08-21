@@ -8,6 +8,14 @@ makeEl = (tagName, className, innerText) ->
 hasClass = (el, className) ->
   className in el.className.split(' ')
 
+addClass = (el, className) ->
+  return if hasClass(el, className)
+
+  el.className = if (el.className == '') then className else "#{el.className} #{className}"
+
+removeClass = (el, className) ->
+  el.className = el.className.replace(className, '').trim()
+
 
 class Sundial
   constructor: (el, options = {}) ->
@@ -56,10 +64,11 @@ class Sundial
     @setSelectedDate moment(), true
 
   show: =>
-    console.log 'should show'
+    addClass @els.popover, 'visible'
+    @_positionPopover()
 
   hide: =>
-    console.log 'should hide'
+    removeClass @els.popover, 'visible'
 
   setCurrentMonth: (year, month) =>
     @currentMonth = moment("#{year}-#{month}", 'YYYY-M').startOf('month')
@@ -90,6 +99,14 @@ class Sundial
 
   setSelectedMinute: (minute) =>
 
+  _positionPopover: ->
+    popoverStyle = @els.popover.style
+    top = @els.input.offsetHeight + @els.input.offsetTop
+    left = @els.input.offsetLeft
+
+    popoverStyle.top = "#{top}px"
+    popoverStyle.left = "#{left}px"
+
 
   _setUpInput: ->
     @els.input.setAttribute 'readonly', 'true'
@@ -97,6 +114,9 @@ class Sundial
   _buildPopover: ->
     # build the popover container
     @els.popover = makeEl 'div', "#{@settings.classPrefix}-popover"
+
+    popoverStyle = @els.popover.style
+    popoverStyle.position = 'absolute'
 
     # build the sidebar if necessary
     @_buildSidebar() if @settings.enableSidebar == true
@@ -111,7 +131,8 @@ class Sundial
     # build the time picker if necessary
     @_buildTimePicker() if @settings.enableTimePicker == true
 
-    document.body.appendChild @els.popover
+    # document.body.appendChild @els.popover
+    @els.input.offsetParent.appendChild @els.popover
 
   _buildSidebar: ->
     # create and append the elements for sidebar stuff
@@ -188,12 +209,13 @@ class Sundial
       parent.appendChild @els.wrapper
 
   _bindEvents: ->
-    @els.input.addEventListener 'focus', @show, true
-    # @els.input.addEventListener 'blur', @hide, true
-    @els.datePickerDecrementMonth.addEventListener 'click', @decrementCurrentMonth, true
-    @els.datePickerIncrementMonth.addEventListener 'click', @incrementCurrentMonth, true
+    @els.input.addEventListener 'focus', @show, false
+    @els.popover.addEventListener 'mousedown', @_handlePopoverClick, false
+    @els.input.addEventListener 'blur', @_handleInputBlur, false
+    @els.datePickerDecrementMonth.addEventListener 'click', @decrementCurrentMonth, false
+    @els.datePickerIncrementMonth.addEventListener 'click', @incrementCurrentMonth, false
 
-    @els.calendarContainer.addEventListener 'click', @_handleCalendarDayClick, true
+    @els.calendarContainer.addEventListener 'click', @_handleCalendarDayClick, false
 
   _buildCalendarHeader: ->
     days = ['<tr>']
@@ -246,7 +268,6 @@ class Sundial
     daysAfterMonthEnd -= 7 while daysAfterMonthEnd > 7
 
     cellCount += 7 - daysAfterMonthEnd
-    console.log 'dbda', daysBeforeMonthStart, daysAfterMonthEnd
 
     rowLength = 0
 
@@ -276,7 +297,6 @@ class Sundial
     @_renderCalendar(calendarMatrix)
 
   _renderCalendar: (calendarMatrix) ->
-    console.log calendarMatrix
     calendarHtml = '<table><tbody>'
 
     for row in calendarMatrix
@@ -298,10 +318,21 @@ class Sundial
       if @settings.enableTimePicker
         @els.sidebarTime.innerText = @selectedDate.format(@settings.sidebarTimeFormat)
 
+  _handleInputBlur: (e) =>
+    if @_clickedPopover
+      @_clickedPopover = false
+      @els.input.focus()
+      return
+
+    @hide()
+
+  _handlePopoverClick: (e) =>
+    @_clickedPopover = true
 
   _handleCalendarDayClick: (e) =>
+    # from here on out, we're only looking at calendar _day_ clicks
     clicked = e.target
-    return unless hasClass(clicked, 'sundial-day-button')
+    return true unless hasClass(clicked, 'sundial-day-button')
 
     @setSelectedDate moment(clicked.dataset.date, @settings.dayButtonDateFormat)
 

@@ -1,5 +1,5 @@
 (function() {
-  var Sundial, hasClass, makeEl,
+  var Sundial, addClass, hasClass, makeEl, removeClass,
     indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -19,6 +19,17 @@
     return indexOf.call(el.className.split(' '), className) >= 0;
   };
 
+  addClass = function(el, className) {
+    if (hasClass(el, className)) {
+      return;
+    }
+    return el.className = el.className === '' ? className : el.className + " " + className;
+  };
+
+  removeClass = function(el, className) {
+    return el.className = el.className.replace(className, '').trim();
+  };
+
   Sundial = (function() {
     function Sundial(el, options) {
       var key, val;
@@ -26,6 +37,8 @@
         options = {};
       }
       this._handleCalendarDayClick = bind(this._handleCalendarDayClick, this);
+      this._handlePopoverClick = bind(this._handlePopoverClick, this);
+      this._handleInputBlur = bind(this._handleInputBlur, this);
       this.setSelectedMinute = bind(this.setSelectedMinute, this);
       this.setSelectedHour = bind(this.setSelectedHour, this);
       this.setSelectedDate = bind(this.setSelectedDate, this);
@@ -70,11 +83,12 @@
     }
 
     Sundial.prototype.show = function() {
-      return console.log('should show');
+      addClass(this.els.popover, 'visible');
+      return this._positionPopover();
     };
 
     Sundial.prototype.hide = function() {
-      return console.log('should hide');
+      return removeClass(this.els.popover, 'visible');
     };
 
     Sundial.prototype.setCurrentMonth = function(year, month) {
@@ -111,12 +125,24 @@
 
     Sundial.prototype.setSelectedMinute = function(minute) {};
 
+    Sundial.prototype._positionPopover = function() {
+      var left, popoverStyle, top;
+      popoverStyle = this.els.popover.style;
+      top = this.els.input.offsetHeight + this.els.input.offsetTop;
+      left = this.els.input.offsetLeft;
+      popoverStyle.top = top + "px";
+      return popoverStyle.left = left + "px";
+    };
+
     Sundial.prototype._setUpInput = function() {
       return this.els.input.setAttribute('readonly', 'true');
     };
 
     Sundial.prototype._buildPopover = function() {
+      var popoverStyle;
       this.els.popover = makeEl('div', this.settings.classPrefix + "-popover");
+      popoverStyle = this.els.popover.style;
+      popoverStyle.position = 'absolute';
       if (this.settings.enableSidebar === true) {
         this._buildSidebar();
       }
@@ -126,7 +152,7 @@
       if (this.settings.enableTimePicker === true) {
         this._buildTimePicker();
       }
-      return document.body.appendChild(this.els.popover);
+      return this.els.input.offsetParent.appendChild(this.els.popover);
     };
 
     Sundial.prototype._buildSidebar = function() {
@@ -193,10 +219,12 @@
     };
 
     Sundial.prototype._bindEvents = function() {
-      this.els.input.addEventListener('focus', this.show, true);
-      this.els.datePickerDecrementMonth.addEventListener('click', this.decrementCurrentMonth, true);
-      this.els.datePickerIncrementMonth.addEventListener('click', this.incrementCurrentMonth, true);
-      return this.els.calendarContainer.addEventListener('click', this._handleCalendarDayClick, true);
+      this.els.input.addEventListener('focus', this.show, false);
+      this.els.popover.addEventListener('mousedown', this._handlePopoverClick, false);
+      this.els.input.addEventListener('blur', this._handleInputBlur, false);
+      this.els.datePickerDecrementMonth.addEventListener('click', this.decrementCurrentMonth, false);
+      this.els.datePickerIncrementMonth.addEventListener('click', this.incrementCurrentMonth, false);
+      return this.els.calendarContainer.addEventListener('click', this._handleCalendarDayClick, false);
     };
 
     Sundial.prototype._buildCalendarHeader = function() {
@@ -240,7 +268,6 @@
         daysAfterMonthEnd -= 7;
       }
       cellCount += 7 - daysAfterMonthEnd;
-      console.log('dbda', daysBeforeMonthStart, daysAfterMonthEnd);
       rowLength = 0;
       for (i = j = 0, ref = cellCount; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
         if (rowLength === 0) {
@@ -264,7 +291,6 @@
 
     Sundial.prototype._renderCalendar = function(calendarMatrix) {
       var calendarHtml, col, j, k, len, len1, row;
-      console.log(calendarMatrix);
       calendarHtml = '<table><tbody>';
       for (j = 0, len = calendarMatrix.length; j < len; j++) {
         row = calendarMatrix[j];
@@ -289,11 +315,24 @@
       }
     };
 
+    Sundial.prototype._handleInputBlur = function(e) {
+      if (this._clickedPopover) {
+        this._clickedPopover = false;
+        this.els.input.focus();
+        return;
+      }
+      return this.hide();
+    };
+
+    Sundial.prototype._handlePopoverClick = function(e) {
+      return this._clickedPopover = true;
+    };
+
     Sundial.prototype._handleCalendarDayClick = function(e) {
       var clicked;
       clicked = e.target;
       if (!hasClass(clicked, 'sundial-day-button')) {
-        return;
+        return true;
       }
       return this.setSelectedDate(moment(clicked.dataset.date, this.settings.dayButtonDateFormat));
     };
