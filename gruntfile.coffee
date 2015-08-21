@@ -46,7 +46,7 @@ module.exports = (grunt) ->
         options:
           spawn: false
       js:
-        files: 'arc/**/*.coffee'
+        files: 'src/**/*.coffee'
         tasks: ['coffee', 'uglify', 'notify:js']
         options:
           spawn: false
