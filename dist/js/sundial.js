@@ -279,7 +279,14 @@
 
     Sundial.prototype._renderSelectedDateTime = function() {
       this.els.input.value = this.selectedDate.format(this.settings.inputFormat);
-      return this.els.inputMask.innerText = this.selectedDate.format(this.settings.maskFormat);
+      this.els.inputMask.innerText = this.selectedDate.format(this.settings.maskFormat);
+      if (this.settings.enableSidebar === true) {
+        this.els.sidebarYear.innerText = this.selectedDate.format(this.settings.sidebarYearFormat);
+        this.els.sidebarDate.innerText = this.selectedDate.format(this.settings.sidebarDateFormat);
+        if (this.settings.enableTimePicker) {
+          return this.els.sidebarTime.innerText = this.selectedDate.format(this.settings.sidebarTimeFormat);
+        }
+      }
     };
 
     Sundial.prototype._handleCalendarDayClick = function(e) {

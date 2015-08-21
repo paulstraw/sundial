@@ -291,6 +291,14 @@ class Sundial
     @els.input.value = @selectedDate.format(@settings.inputFormat)
     @els.inputMask.innerText = @selectedDate.format(@settings.maskFormat)
 
+    if @settings.enableSidebar == true
+      @els.sidebarYear.innerText = @selectedDate.format(@settings.sidebarYearFormat)
+      @els.sidebarDate.innerText = @selectedDate.format(@settings.sidebarDateFormat)
+
+      if @settings.enableTimePicker
+        @els.sidebarTime.innerText = @selectedDate.format(@settings.sidebarTimeFormat)
+
+
   _handleCalendarDayClick: (e) =>
     clicked = e.target
     return unless hasClass(clicked, 'sundial-day-button')
