@@ -32,11 +32,11 @@ class Sundial
       weekStart: 0 # First day of the week (0 is Sunday)
       timePickerDescription: 'Format: 24hr' # Descriptive text below time picker
       inputFormat: null # Format for input (what's actually sent to the server, defaults to ISO 8601)
-      maskFormat: 'YYYY, dddd MMM Do, h:mmA Z' # Display format for input mask
-      dayOfWeekFormat: 'ddd' # Display format for calendar header
+      maskFormat: 'YYYY, dddd MMM Do, h:mmA' # Display format for input mask
+      dayOfWeekFormat: 'dd' # Display format for calendar header
       sidebarYearFormat: 'YYYY' # Display format for sidebar year
       sidebarDateFormat: 'ddd, MMM D' # Display format for sidebar date
-      sidebarTimeFormat: 'h:mmA Z' # Display format for sidebar time
+      sidebarTimeFormat: 'h:mmA' # Display format for sidebar time
       dayButtonDateFormat: 'YYYY-MM-DD' # Internal-ish. Sets the data attribute format on calendar day buttons
 
     # override defaults with passed options
@@ -94,6 +94,7 @@ class Sundial
       @setSelectedMinute(currentlySelectedMinute)
 
     @_renderSelectedDateTime()
+    @_buildCalendar()
 
   setSelectedHour: (hour) =>
 
@@ -235,7 +236,7 @@ class Sundial
 
     # dayClasses.push "#{@settings.classPrefix}-day-disabled" if dayInfo.disabled
     dayClasses.push "#{@settings.classPrefix}-day-today" if dayInfo.today
-    # dayClasses.push "#{@settings.classPrefix}-day-selected" if dayInfo.selected
+    dayClasses.push "#{@settings.classPrefix}-day-selected" if dayInfo.selected
     # dayClasses.push "#{@settings.classPrefix}-day-in-range" if dayInfo.inRange
     # dayClasses.push "#{@settings.classPrefix}-day-is-start-range" if dayInfo.isStartRange
     # dayClasses.push "#{@settings.classPrefix}-day-is-end-range" if dayInfo.isEndRange
@@ -281,7 +282,7 @@ class Sundial
         today: day.isSame(moment(), 'day')
         dateString: day.format(@settings.dayButtonDateFormat)
         dayOfMonth: day.date()
-        # selected:
+        selected: day.isSame(@selectedDate, 'day')
         # inRange:
         # isStartRange:
         # isEndRange:

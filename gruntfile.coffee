@@ -8,6 +8,7 @@ module.exports = (grunt) ->
           style: 'compressed'
         files:
           'dist/css/sundial.css': 'src/scss/sundial.scss'
+          'dist/css/sundial-theme-wizard-club.css': 'src/scss/sundial-theme-wizard-club.scss'
 
     postcss:
       options:
@@ -15,7 +16,7 @@ module.exports = (grunt) ->
           require('autoprefixer-core')({browsers: 'last 2 versions'})
         ]
       dist:
-        src: 'dist/css/sundial.css'
+        src: 'dist/css/*.css'
 
     coffee:
       dist:

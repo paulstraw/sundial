@@ -60,11 +60,11 @@
         weekStart: 0,
         timePickerDescription: 'Format: 24hr',
         inputFormat: null,
-        maskFormat: 'YYYY, dddd MMM Do, h:mmA Z',
-        dayOfWeekFormat: 'ddd',
+        maskFormat: 'YYYY, dddd MMM Do, h:mmA',
+        dayOfWeekFormat: 'dd',
         sidebarYearFormat: 'YYYY',
         sidebarDateFormat: 'ddd, MMM D',
-        sidebarTimeFormat: 'h:mmA Z',
+        sidebarTimeFormat: 'h:mmA',
         dayButtonDateFormat: 'YYYY-MM-DD'
       };
       for (key in options) {
@@ -118,7 +118,8 @@
         this.setSelectedHour(currentlySelectedHour);
         this.setSelectedMinute(currentlySelectedMinute);
       }
-      return this._renderSelectedDateTime();
+      this._renderSelectedDateTime();
+      return this._buildCalendar();
     };
 
     Sundial.prototype.setSelectedHour = function(hour) {};
@@ -246,6 +247,9 @@
       if (dayInfo.today) {
         dayClasses.push(this.settings.classPrefix + "-day-today");
       }
+      if (dayInfo.selected) {
+        dayClasses.push(this.settings.classPrefix + "-day-selected");
+      }
       return "<td class=\"" + this.settings.classPrefix + "-day " + (dayClasses.join(' ')) + "\">\n  <button data-date=\"" + dayInfo.dateString + "\" class=\"" + this.settings.classPrefix + "-day-button\">\n    " + dayInfo.dayOfMonth + "\n  </button>\n</td>";
     };
 
@@ -278,7 +282,8 @@
           empty: i < daysBeforeMonthStart || i >= (daysInMonth + daysBeforeMonthStart),
           today: day.isSame(moment(), 'day'),
           dateString: day.format(this.settings.dayButtonDateFormat),
-          dayOfMonth: day.date()
+          dayOfMonth: day.date(),
+          selected: day.isSame(this.selectedDate, 'day')
         };
         calendarMatrix[calendarMatrix.length - 1].push(this._buildCalendarDay(dayInfo));
         if (++rowLength === 7) {
