@@ -38,6 +38,10 @@ class Sundial
       sidebarDateFormat: 'ddd, MMM D' # Display format for sidebar date
       sidebarTimeFormat: 'h:mmA' # Display format for sidebar time
       dayButtonDateFormat: 'YYYY-MM-DD' # Internal-ish. Sets the data attribute format on calendar day buttons
+      verticalPopoverOffset: 0 # Added to the popover's vertical position during placement
+      horizontalPopoverOffset: 0 # Added to the popover's horizontal position during placement
+
+    @_popoverShowing = false
 
     # override defaults with passed options
     @settings[key] = val for key, val of options
@@ -63,11 +67,19 @@ class Sundial
     # TODO override this by actual DOM value, as appropriate
     @setSelectedDate moment(), true
 
+  _deferredShow: =>
+    setTimeout @show, 0
+
   show: =>
+    return if @_popoverShowing
+    @_popoverShowing = true
+
+    @els.input.focus()
     addClass @els.popover, 'visible'
     @_positionPopover()
 
   hide: =>
+    @_popoverShowing = false
     removeClass @els.popover, 'visible'
 
   setCurrentMonth: (year, month) =>
@@ -102,12 +114,11 @@ class Sundial
 
   _positionPopover: ->
     popoverStyle = @els.popover.style
-    top = @els.input.offsetHeight + @els.input.offsetTop
-    left = @els.input.offsetLeft
+    top = @els.inputMask.offsetHeight + @els.inputMask.offsetTop + @settings.verticalPopoverOffset
+    left = @els.inputMask.offsetLeft + @settings.horizontalPopoverOffset
 
     popoverStyle.top = "#{top}px"
     popoverStyle.left = "#{left}px"
-
 
   _setUpInput: ->
     @els.input.setAttribute 'readonly', 'true'
@@ -211,7 +222,12 @@ class Sundial
 
   _bindEvents: ->
     @els.input.addEventListener 'focus', @show, false
+    @els.inputMask.addEventListener 'mousedown', @_deferredShow, false
+    @els.inputMask.addEventListener 'touchstart', @_deferredShow, false
+
     @els.popover.addEventListener 'mousedown', @_handlePopoverClick, false
+    @els.popover.addEventListener 'touchstart', @_handlePopoverClick, false
+
     @els.input.addEventListener 'blur', @_handleInputBlur, false
     @els.datePickerDecrementMonth.addEventListener 'click', @decrementCurrentMonth, false
     @els.datePickerIncrementMonth.addEventListener 'click', @incrementCurrentMonth, false
@@ -282,7 +298,7 @@ class Sundial
         today: day.isSame(moment(), 'day')
         dateString: day.format(@settings.dayButtonDateFormat)
         dayOfMonth: day.date()
-        selected: day.isSame(@selectedDate, 'day')
+        selected: if @selectedDate then day.isSame(@selectedDate, 'day') else false
         # inRange:
         # isStartRange:
         # isEndRange:

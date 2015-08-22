@@ -47,6 +47,7 @@
       this.setCurrentMonth = bind(this.setCurrentMonth, this);
       this.hide = bind(this.hide, this);
       this.show = bind(this.show, this);
+      this._deferredShow = bind(this._deferredShow, this);
       this.settings = {
         enableSidebar: true,
         enableTimePicker: true,
@@ -65,8 +66,11 @@
         sidebarYearFormat: 'YYYY',
         sidebarDateFormat: 'ddd, MMM D',
         sidebarTimeFormat: 'h:mmA',
-        dayButtonDateFormat: 'YYYY-MM-DD'
+        dayButtonDateFormat: 'YYYY-MM-DD',
+        verticalPopoverOffset: 0,
+        horizontalPopoverOffset: 0
       };
+      this._popoverShowing = false;
       for (key in options) {
         val = options[key];
         this.settings[key] = val;
@@ -82,12 +86,22 @@
       this.setSelectedDate(moment(), true);
     }
 
+    Sundial.prototype._deferredShow = function() {
+      return setTimeout(this.show, 0);
+    };
+
     Sundial.prototype.show = function() {
+      if (this._popoverShowing) {
+        return;
+      }
+      this._popoverShowing = true;
+      this.els.input.focus();
       addClass(this.els.popover, 'visible');
       return this._positionPopover();
     };
 
     Sundial.prototype.hide = function() {
+      this._popoverShowing = false;
       return removeClass(this.els.popover, 'visible');
     };
 
@@ -129,8 +143,8 @@
     Sundial.prototype._positionPopover = function() {
       var left, popoverStyle, top;
       popoverStyle = this.els.popover.style;
-      top = this.els.input.offsetHeight + this.els.input.offsetTop;
-      left = this.els.input.offsetLeft;
+      top = this.els.inputMask.offsetHeight + this.els.inputMask.offsetTop + this.settings.verticalPopoverOffset;
+      left = this.els.inputMask.offsetLeft + this.settings.horizontalPopoverOffset;
       popoverStyle.top = top + "px";
       return popoverStyle.left = left + "px";
     };
@@ -221,7 +235,10 @@
 
     Sundial.prototype._bindEvents = function() {
       this.els.input.addEventListener('focus', this.show, false);
+      this.els.inputMask.addEventListener('mousedown', this._deferredShow, false);
+      this.els.inputMask.addEventListener('touchstart', this._deferredShow, false);
       this.els.popover.addEventListener('mousedown', this._handlePopoverClick, false);
+      this.els.popover.addEventListener('touchstart', this._handlePopoverClick, false);
       this.els.input.addEventListener('blur', this._handleInputBlur, false);
       this.els.datePickerDecrementMonth.addEventListener('click', this.decrementCurrentMonth, false);
       this.els.datePickerIncrementMonth.addEventListener('click', this.incrementCurrentMonth, false);
@@ -283,7 +300,7 @@
           today: day.isSame(moment(), 'day'),
           dateString: day.format(this.settings.dayButtonDateFormat),
           dayOfMonth: day.date(),
-          selected: day.isSame(this.selectedDate, 'day')
+          selected: this.selectedDate ? day.isSame(this.selectedDate, 'day') : false
         };
         calendarMatrix[calendarMatrix.length - 1].push(this._buildCalendarDay(dayInfo));
         if (++rowLength === 7) {
