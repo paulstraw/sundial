@@ -12,8 +12,24 @@ $font-stack: "Avenir-Book", "Corbel", "Lucida Grande", "Lucida Sans Unicode", "L
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-rendering: optimizeLegibility;
+	background: #3F51B5;
+	border-radius: 1px;
 
-	&.visible { display: block; }
+	&.visible {
+		display: block;
+	}
+
+	&:before {
+		content: "";
+		display: block;
+		position: absolute;
+		top: -4px;
+		right: -4px;
+		bottom: -4px;
+		left: -4px;
+		background: rgba(176, 176, 176, 0.25);
+		border-radius: 5px;
+	}
 }
 
 .sundial-sidebar {
@@ -21,7 +37,8 @@ $font-stack: "Avenir-Book", "Corbel", "Lucida Grande", "Lucida Sans Unicode", "L
 	font-weight: 600;
 	font-size: 12px;
 	color: #fff;
-	background: #3F51B5;
+	position: relative;
+	z-index: 1;
 
 	p {
 		margin: 0;
@@ -38,6 +55,12 @@ $font-stack: "Avenir-Book", "Corbel", "Lucida Grande", "Lucida Sans Unicode", "L
 	.sundial-sidebar-time {
 
 	}
+}
+
+.sundial-picker-container {
+	background: #fff;
+	position: relative;
+	z-index: 1;
 }
 
 .sundial-date-picker-header {
@@ -131,5 +154,15 @@ $font-stack: "Avenir-Book", "Corbel", "Lucida Grande", "Lucida Sans Unicode", "L
 				}
 			}
 		}
+	}
+}
+
+.sundial-time-picker {
+	select {
+
+	}
+
+	.sundial-time-picker-description {
+		margin-bottom: 0;
 	}
 }
