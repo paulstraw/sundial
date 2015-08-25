@@ -33,7 +33,7 @@ class Sundial
       timePickerMinuteStep: 1 # Limit which minutes that can be selected. Sixty (60) should generally be divisible by this number
       timePickerSeparator: ':' # Symbol between the hour and minute selectors
       timePickerDescription: 'Format: 24hr' # Descriptive text below time picker
-      inputFormat: moment.defaultFormat # Format for input (what's actually sent to the server, defaults to ISO 8601)
+      inputFormat: moment.defaultFormat # Format for input (what's actually sent to the server, defaults to ISO 8601 [YYYY-MM-DDTHH:mm:ssZ])
       maskFormat: 'dddd MMMM Do, YYYY h:mmA' # Display format for input mask
       dayOfWeekFormat: 'dd' # Display format for calendar header
       sidebarYearFormat: 'YYYY' # Display format for sidebar year

@@ -1,6 +1,6 @@
 {
 "version": 3,
-"mappings": "AAAA,gBAAiB,CAChB,OAAO,CAAE,IAAI,CAEb,wBAAU,CAAE,OAAO,CAAE,KAAK",
+"mappings": "AAEA,gBAAiB,CAChB,OAAO,CAAE,IAAI,CAEb,wBAAU,CAAE,OAAO,CAAE,KAAK",
 "sources": ["../../src/scss/sundial.scss"],
 "names": [],
 "file": "sundial.css"
