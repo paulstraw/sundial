@@ -59,9 +59,10 @@
         maxDate: null,
         enableDate: null,
         weekStart: 0,
+        timePickerSeparator: ':',
         timePickerDescription: 'Format: 24hr',
         inputFormat: null,
-        maskFormat: 'YYYY, dddd MMM Do, h:mmA',
+        maskFormat: 'dddd MMMM Do, YYYY h:mmA',
         dayOfWeekFormat: 'dd',
         sidebarYearFormat: 'YYYY',
         sidebarDateFormat: 'ddd, MMM D',
@@ -143,8 +144,8 @@
     Sundial.prototype._positionPopover = function() {
       var left, popoverStyle, top;
       popoverStyle = this.els.popover.style;
-      top = this.els.inputMask.offsetHeight + this.els.inputMask.offsetTop + this.settings.verticalPopoverOffset;
-      left = this.els.inputMask.offsetLeft + this.settings.horizontalPopoverOffset;
+      top = this.els.wrapper.offsetHeight + this.els.wrapper.offsetTop + this.settings.verticalPopoverOffset;
+      left = this.els.wrapper.offsetLeft + this.settings.horizontalPopoverOffset;
       popoverStyle.top = top + "px";
       return popoverStyle.left = left + "px";
     };
@@ -202,6 +203,7 @@
       var h, hourEl, j, k, m, minuteEl;
       this.els.timePicker = makeEl('div', this.settings.classPrefix + "-time-picker");
       this.els.timePickerHour = makeEl('select', this.settings.classPrefix + "-time-picker-hour");
+      this.els.timePickerSeparator = makeEl('span', this.settings.classPrefix + "-time-picker-separator", this.settings.timePickerSeparator);
       this.els.timePickerMinute = makeEl('select', this.settings.classPrefix + "-time-picker-minute");
       this.els.timePickerDescription = makeEl('p', this.settings.classPrefix + "-time-picker-description", this.settings.timePickerDescription);
       for (h = j = 0; j <= 23; h = ++j) {
@@ -213,6 +215,7 @@
         this.els.timePickerMinute.appendChild(minuteEl);
       }
       this.els.timePicker.appendChild(this.els.timePickerHour);
+      this.els.timePicker.appendChild(this.els.timePickerSeparator);
       this.els.timePicker.appendChild(this.els.timePickerMinute);
       this.els.timePicker.appendChild(this.els.timePickerDescription);
       return this.els.pickerContainer.appendChild(this.els.timePicker);

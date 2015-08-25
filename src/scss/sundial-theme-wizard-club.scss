@@ -1,34 +1,80 @@
 $font-stack: "Avenir-Book", "Corbel", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", "Bitstream Vera Sans", "Liberation Sans", "Verdana", "Verdana Ref", sans-serif;
 
+.sundial-wrapper, .sundial-wrapper *, .sundial-popover, .sundial-popover * {
+	box-sizing: border-box;
+}
+
 .sundial-wrapper {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-rendering: optimizeLegibility;
+	position: relative;
+
+	input {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 1px;
+		height: 1px;
+		border: 0;
+		padding: 0;
+	}
+
+	input:focus + .sundial-input-mask {
+		border-color: #B0B0B0;
+	}
+
+	.sundial-input-mask {
+		border: 2px solid transparent;
+		border-left-color: #B0B0B0;
+		transition: all 120ms linear;
+		background-color: #F2F2F2;
+		padding: 10px 15px 11px;
+		color: #212121;
+		font-size: 13px;
+		font-family: $font-stack;
+	}
 }
 
 .sundial-popover {
 	font-family: $font-stack;
-	display: none;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-rendering: optimizeLegibility;
-	background: #3F51B5;
-	border-radius: 1px;
+	visibility: hidden;
+	opacity: 0;
+	transform-origin: left top;
+	margin-top: -12px;
+	transition: all 150ms ease-out;
 
 	&.visible {
-		display: block;
+		opacity: 10;
+		margin-top: 0;
+		visibility: visible;
 	}
 
-	&:before {
+	&:before, &:after {
 		content: "";
 		display: block;
 		position: absolute;
+	}
+
+	&:before {
 		top: -4px;
 		right: -4px;
 		bottom: -4px;
 		left: -4px;
 		background: rgba(176, 176, 176, 0.25);
 		border-radius: 5px;
+	}
+
+	&:after {
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background: #3F51B5;
+		border-radius: 1px;
 	}
 }
 
@@ -39,6 +85,7 @@ $font-stack: "Avenir-Book", "Corbel", "Lucida Grande", "Lucida Sans Unicode", "L
 	color: #fff;
 	position: relative;
 	z-index: 1;
+	padding: 6px 12px;
 
 	p {
 		margin: 0;
@@ -65,7 +112,7 @@ $font-stack: "Avenir-Book", "Corbel", "Lucida Grande", "Lucida Sans Unicode", "L
 
 .sundial-date-picker-header {
 	position: relative;
-	height: 40px;
+	height: 48px;
 
 	button {
 		background-repeat: no-repeat;
@@ -109,6 +156,8 @@ $font-stack: "Avenir-Book", "Corbel", "Lucida Grande", "Lucida Sans Unicode", "L
 }
 
 .sundial-calendar-container {
+	padding: 0 6px;
+
 	table {
 		border-collapse: collapse;
 		width: 290px;
@@ -158,11 +207,48 @@ $font-stack: "Avenir-Book", "Corbel", "Lucida Grande", "Lucida Sans Unicode", "L
 }
 
 .sundial-time-picker {
-	select {
+	text-align: center;
+	padding: 12px 0 15px;
 
+	select {
+		display: inline-block;
+		appearance: none;
+		padding: 10px 15px 11px;
+		border-radius: 0;
+		background-position: right 15px top 16px;
+		border: 2px solid transparent;
+		border-left-color: #B0B0B0;
+		color: #212121;
+		font-size: 13px;
+		font-family: $font-stack;
+		cursor: pointer;
+
+		&:focus {
+			border-color: #B0B0B0;
+		}
+	}
+
+	.sundial-time-picker-separator {
+		display: inline-block;
+		font-size: 15px;
+		font-weight: 600;
+		padding: 0 4px;
 	}
 
 	.sundial-time-picker-description {
 		margin-bottom: 0;
+		font-size: 13px;
+		font-weight: 600;
+	}
+}
+
+@media screen and (min-width: 440px) {
+	.sundial-sidebar {
+		float: left;
+		width: 100px;
+	}
+
+	.sundial-picker-container {
+		float: left;
 	}
 }

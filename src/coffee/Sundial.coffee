@@ -30,9 +30,10 @@ class Sundial
       maxDate: null # A `moment` specifying the latest date that can be selected
       enableDate: null # A function that receives a `moment` and returns a boolean. Returning `true` enables the date for selection, `false` disables it
       weekStart: 0 # First day of the week (0 is Sunday)
+      timePickerSeparator: ':' # Symbol between the hour and minute selectors
       timePickerDescription: 'Format: 24hr' # Descriptive text below time picker
       inputFormat: null # Format for input (what's actually sent to the server, defaults to ISO 8601)
-      maskFormat: 'YYYY, dddd MMM Do, h:mmA' # Display format for input mask
+      maskFormat: 'dddd MMMM Do, YYYY h:mmA' # Display format for input mask
       dayOfWeekFormat: 'dd' # Display format for calendar header
       sidebarYearFormat: 'YYYY' # Display format for sidebar year
       sidebarDateFormat: 'ddd, MMM D' # Display format for sidebar date
@@ -114,8 +115,8 @@ class Sundial
 
   _positionPopover: ->
     popoverStyle = @els.popover.style
-    top = @els.inputMask.offsetHeight + @els.inputMask.offsetTop + @settings.verticalPopoverOffset
-    left = @els.inputMask.offsetLeft + @settings.horizontalPopoverOffset
+    top = @els.wrapper.offsetHeight + @els.wrapper.offsetTop + @settings.verticalPopoverOffset
+    left = @els.wrapper.offsetLeft + @settings.horizontalPopoverOffset
 
     popoverStyle.top = "#{top}px"
     popoverStyle.left = "#{left}px"
@@ -184,6 +185,7 @@ class Sundial
     # create elements for time picker
     @els.timePicker = makeEl 'div', "#{@settings.classPrefix}-time-picker"
     @els.timePickerHour = makeEl 'select', "#{@settings.classPrefix}-time-picker-hour"
+    @els.timePickerSeparator = makeEl 'span', "#{@settings.classPrefix}-time-picker-separator", @settings.timePickerSeparator
     @els.timePickerMinute = makeEl 'select', "#{@settings.classPrefix}-time-picker-minute"
     @els.timePickerDescription = makeEl 'p', "#{@settings.classPrefix}-time-picker-description", @settings.timePickerDescription
 
@@ -199,6 +201,7 @@ class Sundial
 
     # append elements in the right spots
     @els.timePicker.appendChild @els.timePickerHour
+    @els.timePicker.appendChild @els.timePickerSeparator
     @els.timePicker.appendChild @els.timePickerMinute
     @els.timePicker.appendChild @els.timePickerDescription
 
