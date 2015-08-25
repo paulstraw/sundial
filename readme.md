@@ -23,7 +23,7 @@ new Sundial(someDingus, {options: goHere});
 ## Options / Defaults
 
 ``` coffeescript
-options =
+defaults =
   enableSidebar: true # Render the "current date" sidebar
   enableTimePicker: true # Allow picking time as well as date
   allowEmptyDate: true # Allow date to be cleared
