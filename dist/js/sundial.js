@@ -122,24 +122,40 @@
     };
 
     Sundial.prototype.setSelectedDate = function(date, setTime) {
-      var currentlySelectedHour, currentlySelectedMinute;
+      var previouslySelectedHour, previouslySelectedMinute;
       if (setTime == null) {
         setTime = false;
       }
-      currentlySelectedHour = this.selectedDate ? this.selectedDate.hour() : 0;
-      currentlySelectedMinute = this.selectedDate ? this.selectedDate.minute() : 0;
+      previouslySelectedHour = this.selectedDate ? this.selectedDate.hour() : 0;
+      previouslySelectedMinute = this.selectedDate ? this.selectedDate.minute() : 0;
       this.selectedDate = date;
       if (!setTime) {
-        this.setSelectedHour(currentlySelectedHour);
-        this.setSelectedMinute(currentlySelectedMinute);
+        this.setSelectedHour(previouslySelectedHour, false);
+        this.setSelectedMinute(previouslySelectedMinute, false);
       }
       this._renderSelectedDateTime();
       return this._buildCalendar();
     };
 
-    Sundial.prototype.setSelectedHour = function(hour) {};
+    Sundial.prototype.setSelectedHour = function(hour, render) {
+      if (render == null) {
+        render = true;
+      }
+      this.selectedDate.hours(hour);
+      if (render) {
+        return this._renderSelectedDateTime();
+      }
+    };
 
-    Sundial.prototype.setSelectedMinute = function(minute) {};
+    Sundial.prototype.setSelectedMinute = function(minute, render) {
+      if (render == null) {
+        render = true;
+      }
+      this.selectedDate.minutes(minute);
+      if (render) {
+        return this._renderSelectedDateTime();
+      }
+    };
 
     Sundial.prototype._positionPopover = function() {
       var left, popoverStyle, top;
@@ -245,7 +261,19 @@
       this.els.input.addEventListener('blur', this._handleInputBlur, false);
       this.els.datePickerDecrementMonth.addEventListener('click', this.decrementCurrentMonth, false);
       this.els.datePickerIncrementMonth.addEventListener('click', this.incrementCurrentMonth, false);
-      return this.els.calendarContainer.addEventListener('click', this._handleCalendarDayClick, false);
+      this.els.calendarContainer.addEventListener('click', this._handleCalendarDayClick, false);
+      if (this.settings.enableTimePicker) {
+        this.els.timePickerHour.addEventListener('change', (function(_this) {
+          return function() {
+            return _this.setSelectedHour(_this.els.timePickerHour.value);
+          };
+        })(this), false);
+        return this.els.timePickerMinute.addEventListener('change', (function(_this) {
+          return function() {
+            return _this.setSelectedMinute(_this.els.timePickerMinute.value);
+          };
+        })(this), false);
+      }
     };
 
     Sundial.prototype._buildCalendarHeader = function() {
@@ -335,8 +363,12 @@
         this.els.sidebarYear.innerText = this.selectedDate.format(this.settings.sidebarYearFormat);
         this.els.sidebarDate.innerText = this.selectedDate.format(this.settings.sidebarDateFormat);
         if (this.settings.enableTimePicker) {
-          return this.els.sidebarTime.innerText = this.selectedDate.format(this.settings.sidebarTimeFormat);
+          this.els.sidebarTime.innerText = this.selectedDate.format(this.settings.sidebarTimeFormat);
         }
+      }
+      if (this.settings.enableTimePicker) {
+        this.els.timePickerHour.value = ('0' + this.selectedDate.hour()).slice(-2);
+        return this.els.timePickerMinute.value = ('0' + this.selectedDate.minute()).slice(-2);
       }
     };
 

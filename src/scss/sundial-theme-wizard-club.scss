@@ -1,5 +1,8 @@
 $font-stack: "Avenir-Book", "Corbel", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", "Bitstream Vera Sans", "Liberation Sans", "Verdana", "Verdana Ref", sans-serif;
 
+$left-arrow: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxOC4xLjEsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHdpZHRoPSI2cHgiIGhlaWdodD0iOHB4IiB2aWV3Qm94PSIwIDAgNiA4IiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA2IDgiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHBvbHlnb24gZmlsbD0iIzIxMjEyMSIgcG9pbnRzPSI2LDggMCw0IDYsMCAiLz4NCjwvc3ZnPg0K");
+$right-arrow: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxOC4xLjEsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHdpZHRoPSI2cHgiIGhlaWdodD0iOHB4IiB2aWV3Qm94PSIwIDAgNiA4IiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA2IDgiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHBvbHlnb24gZmlsbD0iIzIxMjEyMSIgcG9pbnRzPSIwLDAgNiw0IDAsOCAiLz4NCjwvc3ZnPg0K");
+
 .sundial-wrapper, .sundial-wrapper *, .sundial-popover, .sundial-popover * {
 	box-sizing: border-box;
 }
@@ -132,11 +135,18 @@ $font-stack: "Avenir-Book", "Corbel", "Lucida Grande", "Lucida Sans Unicode", "L
 		&:active {
 			top: 1px;
 		}
+
+		&.left {
+			background-image: $left-arrow;
+		}
+
+		&.right {
+			background-image: $right-arrow;
+		}
 	}
 
 	.sundial-date-picker-decrement-month {
 		left: 0;
-		background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxOC4xLjEsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHdpZHRoPSI2cHgiIGhlaWdodD0iOHB4IiB2aWV3Qm94PSIwIDAgNiA4IiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA2IDgiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHBvbHlnb24gZmlsbD0iIzIxMjEyMSIgcG9pbnRzPSI2LDggMCw0IDYsMCAiLz4NCjwvc3ZnPg0K");
 	}
 
 	.sundial-date-picker-header-text {
@@ -151,7 +161,6 @@ $font-stack: "Avenir-Book", "Corbel", "Lucida Grande", "Lucida Sans Unicode", "L
 
 	.sundial-date-picker-increment-month {
 		right: 0;
-		background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxOC4xLjEsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHdpZHRoPSI2cHgiIGhlaWdodD0iOHB4IiB2aWV3Qm94PSIwIDAgNiA4IiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA2IDgiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHBvbHlnb24gZmlsbD0iIzIxMjEyMSIgcG9pbnRzPSIwLDAgNiw0IDAsOCAiLz4NCjwvc3ZnPg0K");
 	}
 }
 

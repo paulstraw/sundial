@@ -96,22 +96,28 @@ class Sundial
     @_buildCalendar()
 
   setSelectedDate: (date, setTime = false) =>
-    currentlySelectedHour = if @selectedDate then @selectedDate.hour() else 0
-    currentlySelectedMinute = if @selectedDate then @selectedDate.minute() else 0
+    previouslySelectedHour = if @selectedDate then @selectedDate.hour() else 0
+    previouslySelectedMinute = if @selectedDate then @selectedDate.minute() else 0
 
     @selectedDate = date
 
-    # by default, don't update the time
+    # by default, revert the time to its previous value
     unless setTime
-      @setSelectedHour(currentlySelectedHour)
-      @setSelectedMinute(currentlySelectedMinute)
+      @setSelectedHour(previouslySelectedHour, false)
+      @setSelectedMinute(previouslySelectedMinute, false)
 
     @_renderSelectedDateTime()
     @_buildCalendar()
 
-  setSelectedHour: (hour) =>
+  setSelectedHour: (hour, render = true) =>
+    @selectedDate.hours(hour)
 
-  setSelectedMinute: (minute) =>
+    @_renderSelectedDateTime() if render
+
+  setSelectedMinute: (minute, render = true) =>
+    @selectedDate.minutes(minute)
+
+    @_renderSelectedDateTime() if render
 
   _positionPopover: ->
     popoverStyle = @els.popover.style
@@ -237,6 +243,14 @@ class Sundial
 
     @els.calendarContainer.addEventListener 'click', @_handleCalendarDayClick, false
 
+    if @settings.enableTimePicker
+      @els.timePickerHour.addEventListener 'change', =>
+        @setSelectedHour(@els.timePickerHour.value)
+      , false
+      @els.timePickerMinute.addEventListener 'change', =>
+        @setSelectedMinute(@els.timePickerMinute.value)
+      , false
+
   _buildCalendarHeader: ->
     days = ['<tr>']
 
@@ -337,6 +351,10 @@ class Sundial
 
       if @settings.enableTimePicker
         @els.sidebarTime.innerText = @selectedDate.format(@settings.sidebarTimeFormat)
+
+    if @settings.enableTimePicker
+      @els.timePickerHour.value = ('0' + @selectedDate.hour()).slice(-2) # poor man's `rjust`
+      @els.timePickerMinute.value = ('0' + @selectedDate.minute()).slice(-2) # poor man's `rjust`
 
   _handleInputBlur: (e) =>
     if @_clickedPopover
