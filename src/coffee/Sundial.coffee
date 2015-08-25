@@ -25,14 +25,15 @@ class Sundial
       allowEmptyDate: true # Allow date to be cleared
       classPrefix: 'sundial' # Class prefix, for theming and stuff
       wrapperTagName: 'div' # Change the input wrapper tag
-      currentMonth: moment() # A `moment` specifying the default month to view when the picker is first opened. Overridden by an existing value in the passed input
+      defaultDisplayMonth: moment().startOf('month') # A `moment` specifying the default month to view when the picker is first opened. Overridden by an existing value in the passed input
       minDate: null # A `moment` specifying the earliest date that can be selected
       maxDate: null # A `moment` specifying the latest date that can be selected
       enableDate: null # A function that receives a `moment` and returns a boolean. Returning `true` enables the date for selection, `false` disables it
       weekStart: 0 # First day of the week (0 is Sunday)
+      timePickerMinuteStep: 1 # Limit which minutes that can be selected. Sixty (60) should generally be divisible by this number
       timePickerSeparator: ':' # Symbol between the hour and minute selectors
       timePickerDescription: 'Format: 24hr' # Descriptive text below time picker
-      inputFormat: null # Format for input (what's actually sent to the server, defaults to ISO 8601)
+      inputFormat: moment.defaultFormat # Format for input (what's actually sent to the server, defaults to ISO 8601)
       maskFormat: 'dddd MMMM Do, YYYY h:mmA' # Display format for input mask
       dayOfWeekFormat: 'dd' # Display format for calendar header
       sidebarYearFormat: 'YYYY' # Display format for sidebar year
@@ -47,15 +48,18 @@ class Sundial
     # override defaults with passed options
     @settings[key] = val for key, val of options
 
-    # set current month to view
-    # TODO override this by actual DOM value, as appropriate
-    @currentMonth = @settings.currentMonth.startOf('month')
-
     # create a container for element references
     @els = {}
 
     @els.input = el
     @_setUpInput()
+
+
+    # set current month to view
+    prefilledDate = moment(@els.input.value, @settings.inputFormat)
+    prefilledDate = null unless prefilledDate.isValid()
+
+    @currentDisplayMonth = if prefilledDate then prefilledDate.clone().startOf('month') else @settings.defaultDisplayMonth
 
     # build out all the basic elements
     @_buildPopover()
@@ -65,8 +69,7 @@ class Sundial
     @_buildCalendar()
 
     # set currently selected dateTime
-    # TODO override this by actual DOM value, as appropriate
-    @setSelectedDate moment(), true
+    @setSelectedDate(prefilledDate || moment(), true)
 
   _deferredShow: =>
     setTimeout @show, 0
@@ -83,16 +86,16 @@ class Sundial
     @_popoverShowing = false
     removeClass @els.popover, 'visible'
 
-  setCurrentMonth: (year, month) =>
-    @currentMonth = moment("#{year}-#{month}", 'YYYY-M').startOf('month')
+  setcurrentDisplayMonth: (year, month) =>
+    @currentDisplayMonth = moment("#{year}-#{month}", 'YYYY-M').startOf('month')
     @_buildCalendar()
 
-  decrementCurrentMonth: =>
-    @currentMonth.subtract(1, 'month').startOf('month')
+  decrementcurrentDisplayMonth: =>
+    @currentDisplayMonth.subtract(1, 'month').startOf('month')
     @_buildCalendar()
 
-  incrementCurrentMonth: =>
-    @currentMonth.add(1, 'month').startOf('month')
+  incrementcurrentDisplayMonth: =>
+    @currentDisplayMonth.add(1, 'month').startOf('month')
     @_buildCalendar()
 
   setSelectedDate: (date, setTime = false) =>
@@ -201,7 +204,7 @@ class Sundial
       @els.timePickerHour.appendChild hourEl
 
     # generate minute options
-    for m in [0..59]
+    for m in [0..59] by @settings.timePickerMinuteStep
       minuteEl = makeEl 'option', null, ('0' + m).slice(-2) # poor man's `rjust`
       @els.timePickerMinute.appendChild minuteEl
 
@@ -238,8 +241,8 @@ class Sundial
     @els.popover.addEventListener 'touchstart', @_handlePopoverClick, false
 
     @els.input.addEventListener 'blur', @_handleInputBlur, false
-    @els.datePickerDecrementMonth.addEventListener 'click', @decrementCurrentMonth, false
-    @els.datePickerIncrementMonth.addEventListener 'click', @incrementCurrentMonth, false
+    @els.datePickerDecrementMonth.addEventListener 'click', @decrementcurrentDisplayMonth, false
+    @els.datePickerIncrementMonth.addEventListener 'click', @incrementcurrentDisplayMonth, false
 
     @els.calendarContainer.addEventListener 'click', @_handleCalendarDayClick, false
 
@@ -284,13 +287,13 @@ class Sundial
 
   _buildCalendar: ->
     # update the header to display the correct month and year
-    @els.datePickerHeaderText.innerText = "#{@currentMonth.format('MMMM')} #{@currentMonth.format('YYYY')}"
+    @els.datePickerHeaderText.innerText = "#{@currentDisplayMonth.format('MMMM')} #{@currentDisplayMonth.format('YYYY')}"
 
     # actually render out the calendar-y bits
     calendarMatrix = []
     calendarMatrix.push @_buildCalendarHeader()
-    daysInMonth = @currentMonth.daysInMonth()
-    daysBeforeMonthStart = @currentMonth.day()
+    daysInMonth = @currentDisplayMonth.daysInMonth()
+    daysBeforeMonthStart = @currentDisplayMonth.day()
 
     if @settings.weekStart > 0
       daysBeforeMonthStart -= @settings.weekStart
@@ -307,7 +310,7 @@ class Sundial
 
     for i in [0...cellCount]
       calendarMatrix.push(['<tr>']) if rowLength == 0
-      day = @currentMonth.clone().date(1 + (i - daysBeforeMonthStart))
+      day = @currentDisplayMonth.clone().date(1 + (i - daysBeforeMonthStart))
 
       dayInfo =
         empty: i < daysBeforeMonthStart || i >= (daysInMonth + daysBeforeMonthStart)

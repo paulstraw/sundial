@@ -135,18 +135,11 @@ $right-arrow: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGl
 		&:active {
 			top: 1px;
 		}
-
-		&.left {
-			background-image: $left-arrow;
-		}
-
-		&.right {
-			background-image: $right-arrow;
-		}
 	}
 
 	.sundial-date-picker-decrement-month {
 		left: 0;
+		background-image: $left-arrow;
 	}
 
 	.sundial-date-picker-header-text {
@@ -161,6 +154,7 @@ $right-arrow: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGl
 
 	.sundial-date-picker-increment-month {
 		right: 0;
+		background-image: $right-arrow;
 	}
 }
 

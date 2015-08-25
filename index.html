@@ -18,9 +18,15 @@
 
 	<body>
 		<input type="text" id="dingus">
+		<input type="text" id="dingus2" value="2015-12-31T06:15:00-08:00">
+		<input type="text" id="dingus3">
 
 		<script>
-			new Sundial(document.getElementById('dingus'))
+			new Sundial(document.getElementById('dingus'));
+			new Sundial(document.getElementById('dingus2'));
+			new Sundial(document.getElementById('dingus3'), {
+				enableTimePicker: false
+			});
 		</script>
 	</body>
 </html>

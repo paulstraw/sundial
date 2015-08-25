@@ -32,7 +32,7 @@
 
   Sundial = (function() {
     function Sundial(el, options) {
-      var key, val;
+      var key, prefilledDate, val;
       if (options == null) {
         options = {};
       }
@@ -42,9 +42,9 @@
       this.setSelectedMinute = bind(this.setSelectedMinute, this);
       this.setSelectedHour = bind(this.setSelectedHour, this);
       this.setSelectedDate = bind(this.setSelectedDate, this);
-      this.incrementCurrentMonth = bind(this.incrementCurrentMonth, this);
-      this.decrementCurrentMonth = bind(this.decrementCurrentMonth, this);
-      this.setCurrentMonth = bind(this.setCurrentMonth, this);
+      this.incrementcurrentDisplayMonth = bind(this.incrementcurrentDisplayMonth, this);
+      this.decrementcurrentDisplayMonth = bind(this.decrementcurrentDisplayMonth, this);
+      this.setcurrentDisplayMonth = bind(this.setcurrentDisplayMonth, this);
       this.hide = bind(this.hide, this);
       this.show = bind(this.show, this);
       this._deferredShow = bind(this._deferredShow, this);
@@ -54,14 +54,15 @@
         allowEmptyDate: true,
         classPrefix: 'sundial',
         wrapperTagName: 'div',
-        currentMonth: moment(),
+        defaultDisplayMonth: moment().startOf('month'),
         minDate: null,
         maxDate: null,
         enableDate: null,
         weekStart: 0,
+        timePickerMinuteStep: 1,
         timePickerSeparator: ':',
         timePickerDescription: 'Format: 24hr',
-        inputFormat: null,
+        inputFormat: moment.defaultFormat,
         maskFormat: 'dddd MMMM Do, YYYY h:mmA',
         dayOfWeekFormat: 'dd',
         sidebarYearFormat: 'YYYY',
@@ -76,15 +77,19 @@
         val = options[key];
         this.settings[key] = val;
       }
-      this.currentMonth = this.settings.currentMonth.startOf('month');
       this.els = {};
       this.els.input = el;
       this._setUpInput();
+      prefilledDate = moment(this.els.input.value, this.settings.inputFormat);
+      if (!prefilledDate.isValid()) {
+        prefilledDate = null;
+      }
+      this.currentDisplayMonth = prefilledDate ? prefilledDate.clone().startOf('month') : this.settings.defaultDisplayMonth;
       this._buildPopover();
       this._wrapEl();
       this._bindEvents();
       this._buildCalendar();
-      this.setSelectedDate(moment(), true);
+      this.setSelectedDate(prefilledDate || moment(), true);
     }
 
     Sundial.prototype._deferredShow = function() {
@@ -106,18 +111,18 @@
       return removeClass(this.els.popover, 'visible');
     };
 
-    Sundial.prototype.setCurrentMonth = function(year, month) {
-      this.currentMonth = moment(year + "-" + month, 'YYYY-M').startOf('month');
+    Sundial.prototype.setcurrentDisplayMonth = function(year, month) {
+      this.currentDisplayMonth = moment(year + "-" + month, 'YYYY-M').startOf('month');
       return this._buildCalendar();
     };
 
-    Sundial.prototype.decrementCurrentMonth = function() {
-      this.currentMonth.subtract(1, 'month').startOf('month');
+    Sundial.prototype.decrementcurrentDisplayMonth = function() {
+      this.currentDisplayMonth.subtract(1, 'month').startOf('month');
       return this._buildCalendar();
     };
 
-    Sundial.prototype.incrementCurrentMonth = function() {
-      this.currentMonth.add(1, 'month').startOf('month');
+    Sundial.prototype.incrementcurrentDisplayMonth = function() {
+      this.currentDisplayMonth.add(1, 'month').startOf('month');
       return this._buildCalendar();
     };
 
@@ -216,7 +221,7 @@
     };
 
     Sundial.prototype._buildTimePicker = function() {
-      var h, hourEl, j, k, m, minuteEl;
+      var h, hourEl, j, k, m, minuteEl, ref;
       this.els.timePicker = makeEl('div', this.settings.classPrefix + "-time-picker");
       this.els.timePickerHour = makeEl('select', this.settings.classPrefix + "-time-picker-hour");
       this.els.timePickerSeparator = makeEl('span', this.settings.classPrefix + "-time-picker-separator", this.settings.timePickerSeparator);
@@ -226,7 +231,7 @@
         hourEl = makeEl('option', null, ('0' + h).slice(-2));
         this.els.timePickerHour.appendChild(hourEl);
       }
-      for (m = k = 0; k <= 59; m = ++k) {
+      for (m = k = 0, ref = this.settings.timePickerMinuteStep; k <= 59; m = k += ref) {
         minuteEl = makeEl('option', null, ('0' + m).slice(-2));
         this.els.timePickerMinute.appendChild(minuteEl);
       }
@@ -259,8 +264,8 @@
       this.els.popover.addEventListener('mousedown', this._handlePopoverClick, false);
       this.els.popover.addEventListener('touchstart', this._handlePopoverClick, false);
       this.els.input.addEventListener('blur', this._handleInputBlur, false);
-      this.els.datePickerDecrementMonth.addEventListener('click', this.decrementCurrentMonth, false);
-      this.els.datePickerIncrementMonth.addEventListener('click', this.incrementCurrentMonth, false);
+      this.els.datePickerDecrementMonth.addEventListener('click', this.decrementcurrentDisplayMonth, false);
+      this.els.datePickerIncrementMonth.addEventListener('click', this.incrementcurrentDisplayMonth, false);
       this.els.calendarContainer.addEventListener('click', this._handleCalendarDayClick, false);
       if (this.settings.enableTimePicker) {
         this.els.timePickerHour.addEventListener('change', (function(_this) {
@@ -303,11 +308,11 @@
 
     Sundial.prototype._buildCalendar = function() {
       var calendarMatrix, cellCount, day, dayInfo, daysAfterMonthEnd, daysBeforeMonthStart, daysInMonth, i, j, ref, rowLength;
-      this.els.datePickerHeaderText.innerText = (this.currentMonth.format('MMMM')) + " " + (this.currentMonth.format('YYYY'));
+      this.els.datePickerHeaderText.innerText = (this.currentDisplayMonth.format('MMMM')) + " " + (this.currentDisplayMonth.format('YYYY'));
       calendarMatrix = [];
       calendarMatrix.push(this._buildCalendarHeader());
-      daysInMonth = this.currentMonth.daysInMonth();
-      daysBeforeMonthStart = this.currentMonth.day();
+      daysInMonth = this.currentDisplayMonth.daysInMonth();
+      daysBeforeMonthStart = this.currentDisplayMonth.day();
       if (this.settings.weekStart > 0) {
         daysBeforeMonthStart -= this.settings.weekStart;
         if (daysBeforeMonthStart < 0) {
@@ -325,7 +330,7 @@
         if (rowLength === 0) {
           calendarMatrix.push(['<tr>']);
         }
-        day = this.currentMonth.clone().date(1 + (i - daysBeforeMonthStart));
+        day = this.currentDisplayMonth.clone().date(1 + (i - daysBeforeMonthStart));
         dayInfo = {
           empty: i < daysBeforeMonthStart || i >= (daysInMonth + daysBeforeMonthStart),
           today: day.isSame(moment(), 'day'),
