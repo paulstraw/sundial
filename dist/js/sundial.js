@@ -264,8 +264,18 @@
       this.els.popover.addEventListener('mousedown', this._handlePopoverClick, false);
       this.els.popover.addEventListener('touchstart', this._handlePopoverClick, false);
       this.els.input.addEventListener('blur', this._handleInputBlur, false);
-      this.els.datePickerDecrementMonth.addEventListener('click', this.decrementcurrentDisplayMonth, false);
-      this.els.datePickerIncrementMonth.addEventListener('click', this.incrementcurrentDisplayMonth, false);
+      this.els.datePickerDecrementMonth.addEventListener('click', (function(_this) {
+        return function(e) {
+          e.preventDefault();
+          return _this.decrementcurrentDisplayMonth();
+        };
+      })(this), false);
+      this.els.datePickerIncrementMonth.addEventListener('click', (function(_this) {
+        return function(e) {
+          e.preventDefault();
+          return _this.incrementcurrentDisplayMonth();
+        };
+      })(this), false);
       this.els.calendarContainer.addEventListener('click', this._handleCalendarDayClick, false);
       if (this.settings.enableTimePicker) {
         this.els.timePickerHour.addEventListener('change', (function(_this) {

@@ -49,6 +49,7 @@ $right-arrow: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGl
 	transform-origin: left top;
 	margin-top: -12px;
 	transition: all 150ms ease-out;
+	z-index: 9999;
 
 	&.visible {
 		opacity: 10;

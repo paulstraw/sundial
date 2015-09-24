@@ -241,8 +241,14 @@ class Sundial
     @els.popover.addEventListener 'touchstart', @_handlePopoverClick, false
 
     @els.input.addEventListener 'blur', @_handleInputBlur, false
-    @els.datePickerDecrementMonth.addEventListener 'click', @decrementcurrentDisplayMonth, false
-    @els.datePickerIncrementMonth.addEventListener 'click', @incrementcurrentDisplayMonth, false
+    @els.datePickerDecrementMonth.addEventListener 'click', (e) =>
+      e.preventDefault()
+      @decrementcurrentDisplayMonth()
+    , false
+    @els.datePickerIncrementMonth.addEventListener 'click', (e) =>
+      e.preventDefault()
+      @incrementcurrentDisplayMonth()
+    , false
 
     @els.calendarContainer.addEventListener 'click', @_handleCalendarDayClick, false
 
