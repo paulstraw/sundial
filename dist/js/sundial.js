@@ -52,6 +52,7 @@
         enableSidebar: true,
         enableTimePicker: true,
         allowEmptyDate: true,
+        prefillDate: true,
         classPrefix: 'sundial',
         wrapperTagName: 'div',
         defaultDisplayMonth: moment().startOf('month'),
@@ -80,11 +81,13 @@
       this.els = {};
       this.els.input = el;
       this._setUpInput();
-      prefilledDate = moment(this.els.input.value, this.settings.inputFormat);
-      if (!prefilledDate.isValid()) {
-        prefilledDate = null;
+      if (this.settings.prefillDate) {
+        prefilledDate = moment(this.els.input.value, this.settings.inputFormat);
+        if (!prefilledDate.isValid()) {
+          prefilledDate = null;
+        }
+        this.currentDisplayMonth = prefilledDate ? prefilledDate.clone().startOf('month') : this.settings.defaultDisplayMonth;
       }
-      this.currentDisplayMonth = prefilledDate ? prefilledDate.clone().startOf('month') : this.settings.defaultDisplayMonth;
       this._buildPopover();
       this._wrapEl();
       this._bindEvents();
@@ -189,7 +192,7 @@
       if (this.settings.enableTimePicker === true) {
         this._buildTimePicker();
       }
-      return this.els.input.offsetParent.appendChild(this.els.popover);
+      return this.els.input.parentNode.appendChild(this.els.popover);
     };
 
     Sundial.prototype._buildSidebar = function() {

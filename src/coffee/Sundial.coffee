@@ -23,6 +23,7 @@ class Sundial
       enableSidebar: true # Render the "current date" sidebar
       enableTimePicker: true # Allow picking time as well as date
       allowEmptyDate: true # Allow date to be cleared
+      prefillDate: true
       classPrefix: 'sundial' # Class prefix, for theming and stuff
       wrapperTagName: 'div' # Change the input wrapper tag
       defaultDisplayMonth: moment().startOf('month') # A `moment` specifying the default month to view when the picker is first opened. Overridden by an existing value in the passed input
@@ -55,11 +56,12 @@ class Sundial
     @_setUpInput()
 
 
-    # set current month to view
-    prefilledDate = moment(@els.input.value, @settings.inputFormat)
-    prefilledDate = null unless prefilledDate.isValid()
+    # set current month to view if prefillDate is true
+    if @settings.prefillDate
+      prefilledDate = moment(@els.input.value, @settings.inputFormat);
+      prefilledDate = null unless prefilledDate.isValid()
 
-    @currentDisplayMonth = if prefilledDate then prefilledDate.clone().startOf('month') else @settings.defaultDisplayMonth
+      @currentDisplayMonth = if prefilledDate then prefilledDate.clone().startOf('month') else @settings.defaultDisplayMonth
 
     # build out all the basic elements
     @_buildPopover()
@@ -154,7 +156,7 @@ class Sundial
     @_buildTimePicker() if @settings.enableTimePicker == true
 
     # document.body.appendChild @els.popover
-    @els.input.offsetParent.appendChild @els.popover
+    @els.input.parentNode.appendChild @els.popover
 
   _buildSidebar: ->
     # create and append the elements for sidebar stuff
@@ -381,6 +383,6 @@ class Sundial
     clicked = e.target
     return true unless hasClass(clicked, 'sundial-day-button')
 
-    @setSelectedDate moment(clicked.dataset.date, @settings.dayButtonDateFormat)
+    @setSelectedDate moment(clicked.dataset.date, @settings.dayButtonDateFormat);
 
 window.Sundial = Sundial
