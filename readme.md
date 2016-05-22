@@ -10,6 +10,8 @@ Love,
 
 ## Usage
 
+`npm install sundial-picker` or `bower install sundial-picker`
+
 ``` html
 <input type="text" id="dingus">
 ```

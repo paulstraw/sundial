@@ -1,5 +1,5 @@
 {
-  "name": "Sundial",
+  "name": "sundial-picker",
   "description": "A pretty nice datetime picker.",
   "main": [
     "dist/js/sundial.min.js",
