@@ -154,7 +154,7 @@ class Sundial
     @_buildTimePicker() if @settings.enableTimePicker == true
 
     # document.body.appendChild @els.popover
-    @els.input.offsetParent.appendChild @els.popover
+    @els.input.parentNode.appendChild @els.popover
 
   _buildSidebar: ->
     # create and append the elements for sidebar stuff

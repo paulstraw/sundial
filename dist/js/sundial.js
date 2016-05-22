@@ -189,7 +189,7 @@
       if (this.settings.enableTimePicker === true) {
         this._buildTimePicker();
       }
-      return this.els.input.offsetParent.appendChild(this.els.popover);
+      return this.els.input.parentNode.appendChild(this.els.popover);
     };
 
     Sundial.prototype._buildSidebar = function() {

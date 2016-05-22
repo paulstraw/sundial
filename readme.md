@@ -5,7 +5,7 @@ A pretty nice datetime picker. Hopefully pretty accessible, definitely pretty us
 Minimal styling [required](https://github.com/paulstraw/sundial/blob/master/src/scss/sundial.scss), lots of styling [possible](https://github.com/paulstraw/sundial/blob/master/src/scss/sundial-theme-wizard-club.scss).
 
 Love,  
-[Paul Straw](http://paulstraw.com)
+[Paul Straw](https://twitter.com/paulstraw)
 
 
 ## Usage
@@ -53,4 +53,4 @@ A lot of the calendar rendering code is adapted from the venerable [Pikaday](htt
 
 ## Meta Stuff
 
-Sundial was created by [Paul Straw](https://github.com/paulstraw) for [Octopus Creative](http://octopuscreative.com). It's MIT-licensed (see the [license file](https://github.com/octopuscreative/sundial/blob/master/license.md) for more info). Any contribution is absolutely welcome, but please review the [contribution guidelines](https://github.com/octopuscreative/sundial/blob/master/contributing.md) before getting started.
+Sundial was created by [Paul Straw](https://twitter.com/paulstraw). It's MIT-licensed (see the [license file](https://github.com/paulstraw/sundial/blob/master/license.md) for more info). Any contribution is absolutely welcome, but please review the [contribution guidelines](https://github.com/paulstraw/sundial/blob/master/contributing.md) before getting started.
