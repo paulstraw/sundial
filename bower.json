@@ -1,0 +1,28 @@
+{
+  "name": "Sundial",
+  "description": "A pretty nice datetime picker.",
+  "main": [
+    "dist/js/sundial.min.js",
+    "dist/css/sundial.css"
+  ],
+  "authors": [
+    "Paul Straw"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "date",
+    "datetime",
+    "picker",
+    "datepicker",
+    "timepicker",
+    "time"
+  ],
+  "homepage": "https://github.com/paulstraw/sundial",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

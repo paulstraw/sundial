@@ -100,7 +100,7 @@ project:
    # Navigate to the newly cloned directory
    cd Sundial
    # Assign the original repo to a remote called "upstream"
-   git remote add upstream https://github.com/octopuscreative/sundial
+   git remote add upstream https://github.com/paulstraw/sundial
    ```
 
 2. If you cloned a while ago, get the latest changes from upstream:
@@ -165,4 +165,4 @@ grunt        # build Sundial from source
 grunt watch  # watch for changes and build Sundial automatically
 ```
 
-If you're interested, you can find the task in [Gruntfile.js](https://github.com/octopuscreative/sundial/blob/master/gruntfile.coffee).
+If you're interested, you can find the task in [Gruntfile.js](https://github.com/paulstraw/sundial/blob/master/gruntfile.coffee).

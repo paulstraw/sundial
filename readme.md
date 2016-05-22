@@ -2,10 +2,10 @@
 
 A pretty nice datetime picker. Hopefully pretty accessible, definitely pretty usable. No DOM library required, just add [Moment.js](http://momentjs.com/) and you're good to go.
 
-Minimal styling [required](https://github.com/octopuscreative/sundial/blob/master/src/scss/sundial.scss), lots of styling [possible](https://github.com/octopuscreative/sundial/blob/master/src/scss/sundial-theme-wizard-club.scss).
+Minimal styling [required](https://github.com/paulstraw/sundial/blob/master/src/scss/sundial.scss), lots of styling [possible](https://github.com/paulstraw/sundial/blob/master/src/scss/sundial-theme-wizard-club.scss).
 
 Love,  
-[Octopus](http://octopuscreative.com)
+[Paul Straw](http://paulstraw.com)
 
 
 ## Usage

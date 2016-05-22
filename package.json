@@ -2,8 +2,8 @@
   "name": "Sundial",
   "version": "0.0.1",
   "description": "A datetimepicker.",
-  "author": "Octopus Creative",
-  "repository": "https://github.com/octopuscreative/sundial",
+  "author": "Paul Straw",
+  "repository": "https://github.com/paulstraw/sundial",
   "devDependencies": {
     "autoprefixer-core": "^5.2.1",
     "grunt": "^0.4.5",
